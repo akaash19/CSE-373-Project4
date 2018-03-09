@@ -66,6 +66,21 @@ public class TestArrayDisjointSet extends BaseTest {
     }
 
     @Test(timeout=SECOND)
+    public void testIllegalMakeSet() {
+        String[] items = new String[] {"a", "b", "c", "d", "e"};
+        IDisjointSet<String> forest = this.createForest(items);
+
+        for (int i = 0; i < 5000; i++) {
+            try {
+                forest.makeSet("a");
+                fail("Expected IllegalArgumentException");
+            } catch (IllegalArgumentException ex) {
+                // All ok -- expected result
+            }
+        }
+    }
+
+    @Test(timeout=SECOND)
     public void testIllegalFindSet() {
         String[] items = new String[] {"a", "b", "c", "d", "e"};
         IDisjointSet<String> forest = this.createForest(items);
@@ -117,6 +132,52 @@ public class TestArrayDisjointSet extends BaseTest {
             for (int j = 0; j < numItems; j++) {
                 assertEquals(id, forest.findSet(j));
             }
+        }
+    }
+
+    @Test(timeout=4 * SECOND)
+    public void testLongForest() {
+        IDisjointSet<Integer> forest = new ArrayDisjointSet<>();
+        forest.makeSet(0);
+
+        int numItems = 5000;
+        for (int i = 1; i < numItems; i++) {
+            forest.makeSet(i);
+            forest.union(i-1, i);
+        }
+
+        int cap = 6000;
+        int id = forest.findSet(0);
+        for (int i = 0; i < cap; i++) {
+            for (int j = 0; j < numItems; j++) {
+                assertEquals(id, forest.findSet(j));
+            }
+        }
+    }
+
+    @Test(timeout=SECOND)
+    public void testLongTreeChain() {
+        IDisjointSet<Integer> chain = new ArrayDisjointSet<>();
+
+        int numItems = 5000;
+        for (int i = 0; i < numItems; i++) {
+            chain.makeSet(4 * i);
+            chain.makeSet(4 * i + 1);
+            chain.makeSet(4 * i + 2);
+            chain.makeSet(4 * i + 3);
+
+            chain.union(4 * i + 1, 4 * i + 3);
+            chain.union(4 * i, 4 * i + 1);
+            chain.union(4 * i, 4 * i + 2);
+
+            if (i != 0) {
+                chain.union(4 * i - 3, 4 * i);
+            }
+        }
+
+        int id = chain.findSet(0);
+        for (int j = 0; j < numItems; j++) {
+            assertEquals(id, chain.findSet(j));
         }
     }
 }

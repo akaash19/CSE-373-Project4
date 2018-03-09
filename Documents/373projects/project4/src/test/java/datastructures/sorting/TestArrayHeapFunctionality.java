@@ -341,4 +341,55 @@ public class TestArrayHeapFunctionality extends BaseTest {
         assertEquals(1, heap.size());
         assertFalse(heap.isEmpty());
     }
+
+    @Test(timeout = SECOND)
+    public void testRemove() {
+        IPriorityQueue<String> heap = this.makeInstance();
+        heap.insert("a");
+        heap.insert("b");
+        heap.insert("h");
+        heap.insert("z");
+        heap.insert("y");
+        heap.insert("t");
+        heap.insert("c");
+
+        heap.remove("h");
+        String[] array1 = {"a", "b", "c", "t", "y", "z"};
+        for (int i = 0; i < array1.length; i++) {
+            assertEquals(array1[i], heap.removeMin());
+        }
+    }
+
+    @Test(timeout = SECOND)
+    public void testRemoveEdgeCase() {
+        IPriorityQueue<String> heap1 = this.makeInstance();
+        heap1.insert("a");
+        heap1.insert("b");
+        heap1.insert("h");
+        heap1.insert("z");
+        heap1.insert("y");
+        heap1.insert("t");
+        heap1.insert("c");
+
+        heap1.remove("a");
+        String[] array1 = {"b", "c", "h", "t", "y", "z"};
+        for (int i = 0; i < array1.length; i++) {
+            assertEquals(array1[i], heap1.removeMin());
+        }
+
+        IPriorityQueue<String> heap2 = this.makeInstance();
+        heap2.insert("a");
+        heap2.insert("b");
+        heap2.insert("h");
+        heap2.insert("z");
+        heap2.insert("y");
+        heap2.insert("t");
+        heap2.insert("c");
+
+        heap2.remove("z");
+        String[] array2 = {"a", "b", "c", "h", "t", "y"};
+        for (int i = 0; i < array2.length; i++) {
+            assertEquals(array2[i], heap2.removeMin());
+        }
+    }
 }

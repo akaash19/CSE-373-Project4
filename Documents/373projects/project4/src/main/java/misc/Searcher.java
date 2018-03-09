@@ -1,7 +1,11 @@
 package misc;
 
+import datastructures.concrete.ArrayHeap;
+import datastructures.concrete.DoubleLinkedList;
 import datastructures.interfaces.IList;
-import misc.exceptions.NotYetImplementedException;
+import datastructures.interfaces.IPriorityQueue;
+
+import java.util.Iterator;
 
 public class Searcher {
     /**
@@ -31,6 +35,43 @@ public class Searcher {
         // - You should implement this method by using your ArrayHeap for the sake of
         //   efficiency.
 
-        throw new NotYetImplementedException();
+        if (k < 0) {
+            throw new IllegalArgumentException();
+        }
+
+        IList<T> output = new DoubleLinkedList<>();
+
+        if (k != 0) {
+            Iterator<T> iter = input.iterator();
+            IPriorityQueue<T> minHeap = new ArrayHeap<>();
+
+            // Sort k (or n if k > n) elements from list. Runtime: k*lg(k)
+            int iItem = 1; // i = [1,k]
+            while (iter.hasNext() && iItem <= k) {
+                T element = iter.next();
+                minHeap.insert(element);
+                iItem++;
+            }
+
+            // With remaining list elements, replace minimum in heap only if list
+            // element greater, otherwise discard it. The heap will therefore sort and
+            // store the top k (greatest) elements of the list. Runtime: (n-k)*lg(k)
+            while (iter.hasNext()) {
+                T element = iter.next();
+                if (element.compareTo(minHeap.peekMin()) >= 0) {
+                    minHeap.removeMin();
+                    minHeap.insert(element);
+                }
+            }
+
+            // Copy the k greatest values, which are in ascending (least to greatest)
+            // order to an output list. Runtime: k*lg(k)
+            int size = minHeap.size();
+            for (int i = 0; i < size; i++) {
+                T item = minHeap.removeMin();
+                output.add(item);
+            }
+        }
+            return output; // Worst-case runtime: O(n*lg(k))
     }
 }

@@ -3,8 +3,7 @@ package datastructures.concrete;
 import datastructures.concrete.dictionaries.ChainedHashDictionary;
 import datastructures.interfaces.IDictionary;
 import datastructures.interfaces.IDisjointSet;
-import datastructures.interfaces.IList;
-import misc.exceptions.NotYetImplementedException;
+
 
 /**
  * See IDisjointSet for more details.
@@ -38,18 +37,18 @@ public class ArrayDisjointSet<T> implements IDisjointSet<T> {
                 this.pointers = enlarge();
             }
             this.nodes.put(item, nodeIndex);
-            this.pointers[nodeIndex] = -1 * rank + 1;
+            this.pointers[nodeIndex] = -1 * rank - 1;
         }
     }
 
     private boolean setContains(T item) {
-        return (nodes.containsKey(item));
+        return (this.nodes.containsKey(item));
     }
 
     private int[] enlarge() {
         int[] enlarged = new int[2 * this.pointers.length];
-        for (int id : this.pointers) {
-            enlarged[id] = this.pointers[id];
+        for (KVPair<T, Integer> id : this.nodes) {
+            enlarged[id.getValue()] = this.pointers[id.getValue()];
         }
         return enlarged;
     }
@@ -59,7 +58,17 @@ public class ArrayDisjointSet<T> implements IDisjointSet<T> {
         if (!setContains(item)) {
             throw new IllegalArgumentException();
         } else {
-            return nodes.get(item);
+            int index = this.nodes.get(item);
+            return findSet(index);
+        }
+    }
+
+    private int findSet(int index) {
+        int set = this.pointers[index];
+        if (set < 0) {
+            return index;
+        } else {
+            return findSet(set);
         }
     }
 
@@ -69,11 +78,23 @@ public class ArrayDisjointSet<T> implements IDisjointSet<T> {
             throw new IllegalArgumentException("item1 is not contained inside this disjoint set");
         } else if (!setContains(item2)) {
             throw new IllegalArgumentException("item2 is not contained inside this disjoint set");
-        } else if (findSet(item1) == findSet(item2)) {
+        }
+        int set1 = findSet(item1);
+        int set2 = findSet(item2);
+        if (set1 == set2) {
             throw new IllegalArgumentException("item1 and item2 are already a part of the same set");
         } else {
-            int parentIndex = nodes.get(item1);
-            nodes.put(item2, parentIndex);
+            int rank1 = -1 * this.pointers[set1] - 1;
+            int rank2 = -1 * this.pointers[set2] - 1;
+
+            if (rank1 < rank2) {
+                this.pointers[set1] = set2;
+            } else if (rank1 > rank2) {
+                this.pointers[set2] = set1;
+            } else {
+                this.pointers[set1] = set2;
+                this.pointers[set2] = -1 * (rank2 + 1) - 1;
+            }
         }
     }
 }
